@@ -1,0 +1,257 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1"
+ http-equiv="content-type">
+  <title>MexJSBSim webpage by
+Agostino De Marco</title>
+</head>
+<body>
+<h1 style="width: 998px; font-family: Helvetica,Arial,sans-serif;">MexJSBSim</h1>
+<h2 style="font-family: Helvetica,Arial,sans-serif;">A&nbsp;Matlab
+Mex-Function to use JSBSim from Matlab command line</h2>
+The Matlab Mex-Function MexJSBSim is an attempt to establish a sort of
+standardized way of using a <span
+ style="font-family: Courier New,Courier,monospace; font-weight: bold;">JSBSim::FGFDMExec</span>
+object from Matlab
+command line.<br>
+Currently, this project is developed under the Windows platform (32
+bits). Yet, the source code is platform-independent.<br>
+Every suggestion or criticism is welcomed.<br>
+Download the archive <a href="JSBSim_Matlab.zip">JSBSim_Matlab.zip</a><br>
+<br>
+<h2 style="font-family: Helvetica,Arial,sans-serif;">Compiling tips</h2>
+On Windows platforms this Mex-Function can be compiled and debugged
+with Visual Studio 2008.<br>
+The file <a href="MexJSBSim.mexw32" target="_blank">MexJSBSim.mexw32</a>
+is understood by the Matlab application as a command, just like an
+M-file.<br>
+To compile, just use the solution file <a href="MexJSBSim.sln"
+ target="_blank">MexJSBSim.sln</a>,
+adjusting the include and lib directories as necessary.<br>
+<br>
+<h4>For example:</h4>
+if you&nbsp;use Matlab 2008b installed in <span
+ style="font-family: Courier New,Courier,monospace; font-weight: bold;">C:\Program
+Files\MATLAB\R2008b</span>, in the MexJSBSim project you need to set
+the dirs:<br>
+<span
+ style="font-family: Courier New,Courier,monospace; font-weight: bold;">C:\Program
+Files\MATLAB\R2008b\extern\include</span> and&nbsp;<span
+ style="font-weight: bold; font-family: Courier New,Courier,monospace;">C:\Program
+Files\MATLAB\R2008b\extern\lib\win32\microsoft</span><br>
+to link the Matlab libs: libmx.lib libmex.lib libmat.lib.<br>
+<br>
+The Mex-Function is also linked
+to the static library <a href="JSBSim/lib/JSBSimLib.lib"
+ target="_blank">JSBSimLib.lib</a>, which is made out of the latest
+JSBSim distribution (this project is also included in the solution).<br>
+<br>
+<h3 style="font-family: Helvetica,Arial,sans-serif;">Example of output
+of the command:</h3>
+<small style="font-weight: bold;"><span
+ style="font-family: Courier New,Courier,monospace;">&gt;&gt;MexJSBSim('help')</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<br style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">function
+usage:</span><br style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">result
+= MexJSBSim( string_directive [, string, value] )</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<br style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">Examples:</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;
+res = MexJSBSim('help');</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Prints this help text. returns 1 (always)</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<br style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;
+res = MexJSBSim('open','c172r');</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+returns 1 if success, 0 otherwise</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<br style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;
+res = MexJSBSim('get','fcs/elevator-cmd-norm')</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+returns the value of the property,</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+or -9999 if property not found</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<br style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;
+res = MexJSBSim('set','fcs/elevator-cmd-norm',-0.5)</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+returns 1 if success, 0 otherwise</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<br style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;
+res = MexJSBSim('set','elevator-cmd-norm',-0.5)</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;
+res = MexJSBSim('set','u-fps',80.5)</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+same as above, but it scans a set of predefined,</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+and commonly used variable names:</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+'u-fps', 'v-fps', 'w-fps'</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+'p-rad_sec', 'q-rad_sec', 'r-rad_sec'</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+'h-sl-ft'</span><br style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+'long-gc-deg'</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+'lat-gc-deg'</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+'phi-rad', 'theta-rad', 'psi-rad'</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+'elevator-cmd-norm'</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+'aileron-cmd-norm'</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+'rudder-cmd-norm'</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<br style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;
+res = MexJSBSim('init',ic)</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+initializes the JSBSim::FGFDMExec by means of the</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+matlab structure ic.</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+The structure ic must have the two fields: name and value.</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+The Matlab user is forced to build such a structure first,</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+then to pass it to the mex-file. Example:</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&gt;&gt; ic(1).name = 'u-fps'; ic(1).value = 80;</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&gt;&gt; ic(2).name = 'v-fps'; ic(2).value =&nbsp; 0;</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&gt;&gt; ic(3).name = 'w-fps'; ic(3).value =&nbsp; 0;</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&gt;&gt; ic(4).name = 'p-rad_sec'; ic(4).value =&nbsp; 0;</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&gt;&gt; MexJSBSim('init', ic);</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<br style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;
+res = MexJSBSim('dot',ic)</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+same as above.</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+returns a res vector containing the following time rates.</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+___ body-axis velocity component rates</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+res( 1) : u_dot (ft/s/s)</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+res( 2) : v_dot (ft/s/s)</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+res( 3) : w_dot (ft/s/s)</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+___ body-axis angular velocity component rates</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+res( 4) : p_dot (rad/s/s)</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+res( 5) : q_dot (rad/s/s)</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+res( 6) : r_dot (rad/s/s)</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+___ orientation quaternion component rates</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+res( 7) : q1_dot </span><br
+ style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+res( 8) : q2_dot </span><br
+ style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+res( 9) : q3_dot </span><br
+ style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+res(10) : q4_dot </span><br
+ style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+___ ECEF position vector component rates</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+res(11) : x_dot (ft/s)</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+res(12) : y_dot (ft/s)</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+res(13) : z_dot (ft/s)</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+___ Euler angle rates</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+res(14) : phi_dot&nbsp;&nbsp; (rad/s)</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+res(15) : theta_dot (rad/s)</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+res(16) : psi_dot&nbsp;&nbsp; (rad/s)</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+___ Altitude rate</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+res(17) : h_dot&nbsp;&nbsp;&nbsp;&nbsp; (ft/s)</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+___ Aerodynamic angle rates</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+res(18) : alpha_dot (rad/s)</span><br
+ style="font-family: Courier New,Courier,monospace;">
+<span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+res(19) : beta_dot&nbsp; (rad/s)</span><br
+ style="font-family: Courier New,Courier,monospace;">
+</small>
+</body>
+</html>
