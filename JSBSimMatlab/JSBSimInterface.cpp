@@ -1,6 +1,5 @@
 #include "JSBSimInterface.h"
 #include <models/FGAircraft.h>
-#include <FGState.h>
 #include <math/FGQuaternion.h>
 
 JSBSimInterface::JSBSimInterface(FGFDMExec *fdmex)
@@ -73,7 +72,7 @@ bool JSBSimInterface::Open(const mxArray *prhs)
 
 //***********************************************************************
 	// populate aircraft catalog
-	catalog = fdmExec->SPrintPropertyCatalog();
+	catalog = fdmExec->GetPropertyCatalog();
 
 	if ( verbosityLevel == eVeryVerbose )
 	{
@@ -149,8 +148,8 @@ bool JSBSimInterface::EasySetValue(const string prop, const double value)
 		for(unsigned i=0;i<fdmExec->GetPropulsion()->GetNumEngines();i++)
 			fdmExec->GetPropulsion()->GetEngine(i)->SetRunning(isrunning);
 		fdmExec->GetPropulsion()->GetSteadyState();
-		propagate->Run();
-		auxiliary->Run();
+		propagate->Run(false);
+		auxiliary->Run(false);
 		if ( verbosityLevel == eVeryVerbose )
 			mexPrintf("\tEasy-set: engine(s) running = %d\n",(int)isrunning);
 		return 1;
@@ -158,8 +157,8 @@ bool JSBSimInterface::EasySetValue(const string prop, const double value)
 	else if (prop == "u-fps")
 	{
 		propagate->SetUVW(1,value);
-		propagate->Run();
-		auxiliary->Run();
+		propagate->Run(false);
+		auxiliary->Run(false);
 		if ( verbosityLevel == eVeryVerbose )
 			mexPrintf("\tEasy-set: true flight speed (ft/s) = %f\n",auxiliary->GetVt());
 		return 1;
@@ -167,8 +166,8 @@ bool JSBSimInterface::EasySetValue(const string prop, const double value)
 	else if (prop == "v-fps")
 	{
 		propagate->SetUVW(2,value);
-		propagate->Run();
-		auxiliary->Run();
+		propagate->Run(false);
+		auxiliary->Run(false);
 		if ( verbosityLevel == eVeryVerbose )
 			mexPrintf("\tEasy-set: true flight speed (ft/s) = %f\n",auxiliary->GetVt());
 		return 1;
@@ -176,8 +175,8 @@ bool JSBSimInterface::EasySetValue(const string prop, const double value)
 	else if (prop == "w-fps")
 	{
 		propagate->SetUVW(3,value);
-		propagate->Run();
-		auxiliary->Run();
+		propagate->Run(false);
+		auxiliary->Run(false);
 		if ( verbosityLevel == eVeryVerbose )
 			mexPrintf("\tEasy-set: true flight speed (ft/s) = %f\n",auxiliary->GetVt());
 		return 1;
@@ -185,8 +184,8 @@ bool JSBSimInterface::EasySetValue(const string prop, const double value)
 	else if (prop == "p-rad_sec")
 	{
 		propagate->SetPQR(1,value);
-		propagate->Run();
-		auxiliary->Run();
+		propagate->Run(false);
+		auxiliary->Run(false);
 		if ( verbosityLevel == eVeryVerbose )
 			mexPrintf("\tEasy-set: roll rate (rad/s) = %f\n",propagate->GetPQR(1));
 		return 1;
@@ -194,8 +193,8 @@ bool JSBSimInterface::EasySetValue(const string prop, const double value)
 	else if (prop == "q-rad_sec")
 	{
 		propagate->SetPQR(2,value);
-		propagate->Run();
-		auxiliary->Run();
+		propagate->Run(false);
+		auxiliary->Run(false);
 		if ( verbosityLevel == eVeryVerbose )
 			mexPrintf("\tEasy-set: pitch rate (rad/s) = %f\n",propagate->GetPQR(2));
 		return 1;
@@ -203,26 +202,26 @@ bool JSBSimInterface::EasySetValue(const string prop, const double value)
 	else if (prop == "r-rad_sec")
 	{
 		propagate->SetPQR(3,value);
-		propagate->Run();
-		auxiliary->Run();
+		propagate->Run(false);
+		auxiliary->Run(false);
 		if ( verbosityLevel == eVeryVerbose )
 			mexPrintf("\tEasy-set: yaw rate (rad/s) = %f\n",propagate->GetPQR(3));
 		return 1;
 	}
 	else if (prop == "h-sl-ft")
 	{
-		propagate->Seth(value);
-		propagate->Run();
-		auxiliary->Run();
+		propagate->SetAltitudeASL(value);
+		propagate->Run(false);
+		auxiliary->Run(false);
 		if ( verbosityLevel == eVeryVerbose )
-			mexPrintf("\tEasy-set: altitude over sea level (mt) = %f\n",propagate->Gethmeters());
+			mexPrintf("\tEasy-set: altitude over sea level (mt) = %f\n",propagate->GetAltitudeASLmeters());
 		return 1;
 	}
 	else if (prop == "long-gc-deg")
 	{
 		propagate->SetLongitudeDeg(value);
-		propagate->Run();
-		auxiliary->Run();
+		propagate->Run(false);
+		auxiliary->Run(false);
 		if ( verbosityLevel == eVeryVerbose )
 			mexPrintf("\tEasy-set: geocentric longitude (deg) = %f\n",propagate->GetLongitudeDeg());
 		return 1;
@@ -230,8 +229,8 @@ bool JSBSimInterface::EasySetValue(const string prop, const double value)
 	else if (prop == "lat-gc-deg")
 	{
 		propagate->SetLatitudeDeg(value);
-		propagate->Run();
-		auxiliary->Run();
+		propagate->Run(false);
+		auxiliary->Run(false);
 		if ( verbosityLevel == eVeryVerbose )
 			mexPrintf("\tEasy-set: geocentric latitude (deg) = %f\n",propagate->GetLatitudeDeg());
 		return 1;
@@ -243,8 +242,8 @@ bool JSBSimInterface::EasySetValue(const string prop, const double value)
 		FGPropagate::VehicleState vstate = propagate->GetVState();
 		vstate.vQtrn = Quat;
 		propagate->SetVState(vstate);
-		propagate->Run(); // vVel => gamma
-		auxiliary->Run(); // alpha, beta, gamma
+		propagate->Run(false); // vVel => gamma
+		auxiliary->Run(false); // alpha, beta, gamma
 		if ( verbosityLevel == eVeryVerbose )
 			mexPrintf("\tEasy-set: phi -> quaternion = (%f,%f,%f,%f)\n",
 				propagate->GetVState().vQtrn(1),propagate->GetVState().vQtrn(2),propagate->GetVState().vQtrn(3),propagate->GetVState().vQtrn(4));
@@ -261,8 +260,8 @@ bool JSBSimInterface::EasySetValue(const string prop, const double value)
 		FGPropagate::VehicleState vstate = propagate->GetVState();
 		vstate.vQtrn = Quat;
 		propagate->SetVState(vstate);
-		propagate->Run(); // vVel => gamma
-		auxiliary->Run(); // alpha, beta, gamma
+		propagate->Run(false); // vVel => gamma
+		auxiliary->Run(false); // alpha, beta, gamma
 		if ( verbosityLevel == eVeryVerbose )
 			mexPrintf("\tEasy-set: theta -> quaternion = (%f,%f,%f,%f)\n",
 				propagate->GetVState().vQtrn(1),propagate->GetVState().vQtrn(2),propagate->GetVState().vQtrn(3),propagate->GetVState().vQtrn(4));
@@ -279,8 +278,8 @@ bool JSBSimInterface::EasySetValue(const string prop, const double value)
 		FGPropagate::VehicleState vstate = propagate->GetVState();
 		vstate.vQtrn = Quat;
 		propagate->SetVState(vstate);
-		propagate->Run(); // vVel => gamma
-		auxiliary->Run(); // alpha, beta, gamma
+		propagate->Run(false); // vVel => gamma
+		auxiliary->Run(false); // alpha, beta, gamma
 		if ( verbosityLevel == eVeryVerbose )
 			mexPrintf("\tEasy-set: psi -> quaternion = (%f,%f,%f,%f)\n",
 				propagate->GetVState().vQtrn(1),propagate->GetVState().vQtrn(2),propagate->GetVState().vQtrn(3),propagate->GetVState().vQtrn(4));
@@ -293,9 +292,9 @@ bool JSBSimInterface::EasySetValue(const string prop, const double value)
 	else if (prop == "elevator-cmd-norm")
 	{
 		fdmExec->GetFCS()->SetDeCmd(value);
-		fdmExec->GetFCS()->Run();
-		propagate->Run();
-		auxiliary->Run();
+		fdmExec->GetFCS()->Run(false);
+		propagate->Run(false);
+		auxiliary->Run(false);
 		if ( verbosityLevel == eVeryVerbose )
 			mexPrintf("\tEasy-set: elevator pos (deg) = %f\n",fdmExec->GetFCS()->GetDePos()*180./M_PI);
 		return 1;
@@ -303,9 +302,9 @@ bool JSBSimInterface::EasySetValue(const string prop, const double value)
 	else if (prop == "aileron-cmd-norm")
 	{
 		fdmExec->GetFCS()->SetDaCmd(value);
-		fdmExec->GetFCS()->Run();
-		propagate->Run();
-		auxiliary->Run();
+		fdmExec->GetFCS()->Run(false);
+		propagate->Run(false);
+		auxiliary->Run(false);
 		if ( verbosityLevel == eVeryVerbose )
 			mexPrintf("\tEasy-set: right aileron pos (deg) = %f\n",fdmExec->GetFCS()->GetDaRPos()*180./M_PI);
 		return 1;
@@ -313,9 +312,9 @@ bool JSBSimInterface::EasySetValue(const string prop, const double value)
 	else if (prop == "rudder-cmd-norm")
 	{
 		fdmExec->GetFCS()->SetDrCmd(value);
-		fdmExec->GetFCS()->Run();
-		propagate->Run();
-		auxiliary->Run();
+		fdmExec->GetFCS()->Run(false);
+		propagate->Run(false);
+		auxiliary->Run(false);
 		if ( verbosityLevel == eVeryVerbose )
 			mexPrintf("\tEasy-set: rudder pos (deg) = %f\n",fdmExec->GetFCS()->GetDrPos()*180./M_PI);
 		return 1;

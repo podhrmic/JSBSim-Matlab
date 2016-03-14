@@ -52,10 +52,22 @@ public:
 
 	// Wrapper functions to the FGFDMExec class
 	bool RunFDMExec() {return fdmExec->Run();}
-	bool RunPropagate() {return propagate->Run();}
-	bool RunAuxiliary() {return auxiliary->Run();}
-	bool RunPropulsion() {return propulsion->Run();}
-	bool RunFCS() {return fcs->Run();}
+
+	// false - never hold the simulation time from advancing
+	// TODO: make setable
+	bool RunPropagate() {return propagate->Run(false);}
+
+	// false - never hold the simulation time from advancing
+	// TODO: make setable
+	bool RunAuxiliary() {return auxiliary->Run(false);}
+
+	// false - never hold the simulation time from advancing
+	// TODO: make setable
+	bool RunPropulsion() {return propulsion->Run(false);}
+
+	// false - never hold the simulation time from advancing
+	// TODO: make setable
+	bool RunFCS() {return fcs->Run(false);}
 
 	enum JIVerbosityLevel {eSilent=0, eVerbose, eVeryVerbose} verbosityLevel;
 
