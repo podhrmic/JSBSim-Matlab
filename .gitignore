@@ -27,3 +27,10 @@ obj/
 [Rr]elease*/
 _ReSharper*/
 [Tt]est[Rr]esult*
+
+# Eclipse project files
+.cproject
+.project
+
+# Backup files
+*~
