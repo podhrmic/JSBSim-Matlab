@@ -164,7 +164,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 				{
 					mexPrintf("Check property name.\n");
 					// const char *buf = "PROPERTY NOT SET";
-					// plhs[0]= mxCreateCharMatrixFromStrings((mwSize)1, (const char **)buf); 
+					// plhs[0]= mxCreateCharMatrixFromStrings((mwSize)1, (const char **)buf);
 					plhs[0] = mxCreateDoubleMatrix(1, 1, mxREAL);
 					*mxGetPr(plhs[0]) = -9999;
 					return;

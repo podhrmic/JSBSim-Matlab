@@ -7,6 +7,8 @@ JSBSimInterface::JSBSimInterface(FGFDMExec *fdmex)
 	_ac_model_loaded = false;
 	fdmExec = fdmex;
 	propagate = fdmExec->GetPropagate();
+	accel = fdmExec->GetAccelerations();
+	//accel->InitModel();
 	auxiliary = fdmExec->GetAuxiliary();
 	aerodynamics = fdmExec->GetAerodynamics();
 	propulsion = fdmExec->GetPropulsion();
@@ -240,13 +242,14 @@ bool JSBSimInterface::EasySetValue(const string prop, const double value)
 		FGQuaternion Quat( value, propagate->GetEuler(2), propagate->GetEuler(3) );
 		Quat.Normalize();
 		FGPropagate::VehicleState vstate = propagate->GetVState();
-		vstate.vQtrn = Quat;
+		vstate.qAttitudeLocal = Quat;
 		propagate->SetVState(vstate);
 		propagate->Run(false); // vVel => gamma
 		auxiliary->Run(false); // alpha, beta, gamma
 		if ( verbosityLevel == eVeryVerbose )
 			mexPrintf("\tEasy-set: phi -> quaternion = (%f,%f,%f,%f)\n",
-				propagate->GetVState().vQtrn(1),propagate->GetVState().vQtrn(2),propagate->GetVState().vQtrn(3),propagate->GetVState().vQtrn(4));
+				propagate->GetVState().qAttitudeLocal(1),propagate->GetVState().qAttitudeLocal(2),
+				propagate->GetVState().qAttitudeLocal(3),propagate->GetVState().qAttitudeLocal(4));
 		/*
 		mexPrintf("\tEasy-set: alpha (deg) = %f,\n\tbeta (deg) = %f,\n\tgamma (deg) = %f\n",
 			auxiliary->Getalpha()*180./M_PI,auxiliary->Getbeta()*180./M_PI,auxiliary->GetGamma()*180./M_PI);
@@ -258,13 +261,14 @@ bool JSBSimInterface::EasySetValue(const string prop, const double value)
 		FGQuaternion Quat( propagate->GetEuler(1), value, propagate->GetEuler(3) );
 		Quat.Normalize();
 		FGPropagate::VehicleState vstate = propagate->GetVState();
-		vstate.vQtrn = Quat;
+		vstate.qAttitudeLocal = Quat;
 		propagate->SetVState(vstate);
 		propagate->Run(false); // vVel => gamma
 		auxiliary->Run(false); // alpha, beta, gamma
 		if ( verbosityLevel == eVeryVerbose )
 			mexPrintf("\tEasy-set: theta -> quaternion = (%f,%f,%f,%f)\n",
-				propagate->GetVState().vQtrn(1),propagate->GetVState().vQtrn(2),propagate->GetVState().vQtrn(3),propagate->GetVState().vQtrn(4));
+				propagate->GetVState().qAttitudeLocal(1),propagate->GetVState().qAttitudeLocal(2),
+				propagate->GetVState().qAttitudeLocal(3),propagate->GetVState().qAttitudeLocal(4));
 		/*
 		mexPrintf("\tEasy-set: alpha (deg) = %f,\n\tbeta (deg) = %f,\n\tgamma (deg) = %f\n",
 			auxiliary->Getalpha()*180./M_PI,auxiliary->Getbeta()*180./M_PI,auxiliary->GetGamma()*180./M_PI);
@@ -276,13 +280,14 @@ bool JSBSimInterface::EasySetValue(const string prop, const double value)
 		FGQuaternion Quat( propagate->GetEuler(1), propagate->GetEuler(2), value );
 		Quat.Normalize();
 		FGPropagate::VehicleState vstate = propagate->GetVState();
-		vstate.vQtrn = Quat;
+		vstate.qAttitudeLocal = Quat;
 		propagate->SetVState(vstate);
 		propagate->Run(false); // vVel => gamma
 		auxiliary->Run(false); // alpha, beta, gamma
 		if ( verbosityLevel == eVeryVerbose )
 			mexPrintf("\tEasy-set: psi -> quaternion = (%f,%f,%f,%f)\n",
-				propagate->GetVState().vQtrn(1),propagate->GetVState().vQtrn(2),propagate->GetVState().vQtrn(3),propagate->GetVState().vQtrn(4));
+				propagate->GetVState().qAttitudeLocal(1),propagate->GetVState().qAttitudeLocal(2),
+				propagate->GetVState().qAttitudeLocal(3),propagate->GetVState().qAttitudeLocal(4));
 		/*
 		mexPrintf("\tEasy-set: alpha (deg) = %f,\n\tbeta (deg) = %f,\n\tgamma (deg) = %f\n",
 			auxiliary->Getalpha()*180./M_PI,auxiliary->Getbeta()*180./M_PI,auxiliary->GetGamma()*180./M_PI);
@@ -337,7 +342,8 @@ void JSBSimInterface::PrintCatalog()
 {
 	if ( verbosityLevel == eVerbose )
 	{
-		mexPrintf("-- Property catalog for current aircraft ('%s'):\n",fdmExec->GetAircraft()->GetAircraftName());
+		const std::string& name = fdmExec->GetAircraft()->GetAircraftName();
+		mexPrintf("-- Property catalog for current aircraft ('%s'):\n", name.c_str());
 		for (unsigned i=0; i<catalog.size(); i++)
 			mexPrintf("%s\n",catalog[i].c_str());
 		mexPrintf("-- end of catalog\n");
@@ -360,7 +366,7 @@ bool JSBSimInterface::Init(const mxArray *prhs1)
 	//*************************************************
 	// Set dt=0 first
 
-	fdmExec->GetState()->SuspendIntegration();
+	fdmExec->SuspendIntegration();
 	
 	//*************************************************
 
@@ -513,25 +519,28 @@ bool JSBSimInterface::Init(const mxArray *prhs1)
 
 
 	fdmExec->Run();
-	fdmExec->GetState()->ResumeIntegration();
+	fdmExec->ResumeIntegration();
 
 
 	// Calculate state derivatives
-	fdmExec->GetPropagate()->CalculatePQRdot();      // Angular rate derivative
-	fdmExec->GetPropagate()->CalculateUVWdot();      // Translational rate derivative
-	fdmExec->GetPropagate()->CalculateQuatdot();     // Angular orientation derivative
-	fdmExec->GetPropagate()->CalculateLocationdot(); // Translational position derivative
+	//fdmExec->GetAccelerations()->CalculatePQRdot();      // Angular rate derivative (should be done automatically)
+	//fdmExec->GetAccelerations()->CalculateUVWdot();      // Translational rate derivative (should be done automatically)
+	//fdmExec->GetPropagate()->CalculateQuatdot();     // Angular orientation derivative (should be done automatically)
+	//fdmExec->GetPropagate()->CalculateLocationdot(); // Translational position derivative (should be done automatically)
 
 	// FDMExec.GetAuxiliary()->Run();
 	FGColumnVector3 euler_rates = auxiliary->GetEulerRates();
-	FGColumnVector3 position_rates = propagate->GetLocationdot();
+	FGColumnVector3 position_rates = propagate->GetUVW();
 
-	_udot = propagate->GetUVWdot(1);
-	_vdot = propagate->GetUVWdot(2);
-	_wdot = propagate->GetUVWdot(3);
-	_pdot = propagate->GetPQRdot(1);
-	_qdot = propagate->GetPQRdot(2);
-	_rdot = propagate->GetPQRdot(3);
+	/*
+	 * dunno what is wrong here
+	_udot = accel->GetUVWdot(1);
+	_vdot = fdmExec->GetAccelerations()->GetUVWdot(2);
+	_wdot = fdmExec->GetAccelerations()->GetUVWdot(3);
+	_pdot = fdmExec->GetAccelerations()->GetPQRdot(1);
+	_qdot = fdmExec->GetAccelerations()->GetPQRdot(2);
+	_rdot = fdmExec->GetAccelerations()->GetPQRdot(3);
+	*/
 	FGQuaternion Quatdot = propagate->GetQuaterniondot();
 	_q1dot = Quatdot(1);
 	_q2dot = Quatdot(2);
@@ -552,10 +561,10 @@ bool JSBSimInterface::Init(const mxArray *prhs1)
 		mexPrintf("\tState derivatives calculated.\n");
 
 		mexPrintf("\tV true %f (ft/s)\n",auxiliary->GetVt());
-		mexPrintf("\t[u_dot, v_dot, w_dot] = [%f, %f, %f] (ft/s/s)\n",
-			propagate->GetUVWdot(1),propagate->GetUVWdot(2),propagate->GetUVWdot(3));
-		mexPrintf("\t[p_dot, q_dot, r_dot] = [%f, %f, %f] (rad/s/s)\n",
-			propagate->GetPQRdot(1),propagate->GetPQRdot(2),propagate->GetPQRdot(3));
+		//mexPrintf("\t[u_dot, v_dot, w_dot] = [%f, %f, %f] (ft/s/s)\n",
+		//	propagate->GetUVWdot(1),propagate->GetUVWdot(2),propagate->GetUVWdot(3));
+		//mexPrintf("\t[p_dot, q_dot, r_dot] = [%f, %f, %f] (rad/s/s)\n",
+		//	propagate->GetPQRdot(1),propagate->GetPQRdot(2),propagate->GetPQRdot(3));
 		mexPrintf("\t[x_dot,y_dot,z_dot] = [%f, %f, %f] (ft/s)\n",
 			position_rates(1),position_rates(2),position_rates(3));
 		mexPrintf("\t[phi_dot,theta_dot,psi_dot] = [%f, %f, %f] (rad/s)\n",

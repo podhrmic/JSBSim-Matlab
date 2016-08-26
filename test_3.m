@@ -10,7 +10,7 @@ MexJSBSim('open','c172r')
 
 % initial conditions and inputs
 ic( 1).name  = 'u-fps';
-ic( 1).value = convvel(90,'km/h','ft/s');
+ic( 1).value = 6;%convvel(90,'km/h','ft/s');
 ic( 2).name  = 'v-fps';
 ic( 2).value = 0;
 ic( 3).name  = 'w-fps';
@@ -60,7 +60,9 @@ w = ic( 3).value;
 theta = ic(11).value;
 
 Vt = sqrt(u.^2+v.^2+w.^2);
-[alpha beta] = alphabeta([u v w]);
+%[alpha beta] = alphabeta([u v w]);
+alpha = 1;
+beta = 1;
 
 alpha*180/pi
 

@@ -78,6 +78,7 @@ public:
 private:
 	FGFDMExec *fdmExec;
 	FGPropagate *propagate;
+	FGAccelerations *accel;
 	FGAuxiliary *auxiliary;
 	vector<string> catalog;
 	FGInitialCondition *ic;

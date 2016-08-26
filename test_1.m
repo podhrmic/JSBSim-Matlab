@@ -1,11 +1,12 @@
 clear all; close all
 clc
 
+MexJSBSim('SetVerbosity',2)
 MexJSBSim('open','c172r')
 
 % initial conditions and inputs
 ic( 1).name  = 'u-fps';
-ic( 1).value = 80;
+ic( 1).value = 0;
 ic( 2).name  = 'v-fps';
 ic( 2).value = 20;
 ic( 3).name  = 'w-fps';
@@ -39,13 +40,15 @@ ic(14).value = -0.4;
 ic(15).name  = 'rudder-cmd-norm';
 ic(15).value = 1;
 
-ic(16).name  = 'fcs/throttle-cmd-norm';
+ic(16).name  = 'set-running';
 ic(16).value = 1;
-ic(17).name  = 'fcs/mixture-cmd-norm';
-ic(17).value = 0.7;
-ic(18).name  = 'set-running';
-ic(18).value = 1;
+%ic(16).name  = 'fcs/throttle-cmd-norm';
+%ic(16).value = 1;
+%ic(17).name  = 'fcs/mixture-cmd-norm';
+%ic(17).value = 0.7;
+%ic(18).name  = 'set-running';
+%ic(18).value = 1;
     
-MexJSBSim('init',ic)
+ret = MexJSBSim('init',ic)
 
 %clear MexJSBSim

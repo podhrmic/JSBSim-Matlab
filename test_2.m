@@ -42,12 +42,14 @@ ic(14).value = -0.4;
 ic(15).name  = 'rudder-cmd-norm';
 ic(15).value = 1;
 
-ic(16).name  = 'fcs/throttle-cmd-norm';
+ic(16).name  = 'set-running';
 ic(16).value = 1;
-ic(17).name  = 'fcs/mixture-cmd-norm';
-ic(17).value = 0.7;
-ic(18).name  = 'set-running';
-ic(18).value = 1;
+%ic(16).name  = 'fcs/throttle-cmd-norm';
+%ic(16).value = 1;
+%ic(17).name  = 'fcs/mixture-cmd-norm';
+%ic(17).value = 0.7;
+%ic(18).name  = 'set-running';
+%ic(18).value = 1;
 
 MexJSBSim('SetVerbosity','very verbose');
 MexJSBSim('dot',ic)
