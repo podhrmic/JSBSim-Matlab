@@ -7,6 +7,7 @@
 
 #include "TestInterface.h"
 #include <models/FGAircraft.h>
+#include <models/FGAccelerations.h>
 #include <math/FGQuaternion.h>
 
 //hack for lazy people
@@ -19,7 +20,7 @@ TestInterface::TestInterface(FGFDMExec *fdmex)
 	fdmExec = fdmex;
 	propagate = fdmExec->GetPropagate();
 	accel = fdmExec->GetAccelerations();
-	//accel->InitModel();
+	accel->InitModel();
 	auxiliary = fdmExec->GetAuxiliary();
 	aerodynamics = fdmExec->GetAerodynamics();
 	propulsion = fdmExec->GetPropulsion();
@@ -380,21 +381,21 @@ double TestInterface::EasyGetValue(const string prop)
   }
   else if (prop == "phi-rad")
   {
-    FGColumnVector3 euler = propagate->GetVState().GetEuler();
+    FGColumnVector3 euler = propagate->GetVState().qAttitudeLocal.GetEuler();
     if ( verbosityLevel == eVeryVerbose )
       mexPrintf("\tEasy-get: phi-rad = %f\n",euler.Entry(1));
     return euler.Entry(1);
   }
   else if (prop == "theta-rad")
   {
-    FGColumnVector3 euler = propagate->GetVState().GetEuler();
+    FGColumnVector3 euler = propagate->GetVState().qAttitudeLocal.GetEuler();
     if ( verbosityLevel == eVeryVerbose )
       mexPrintf("\tEasy-get: theta-rad = %f\n",euler.Entry(2));
     return euler.Entry(2);
   }
   else if (prop == "psi-rad")
   {
-    FGColumnVector3 euler = propagate->GetVState().GetEuler();
+    FGColumnVector3 euler = propagate->GetVState().qAttitudeLocal.GetEuler();
     if ( verbosityLevel == eVeryVerbose )
       mexPrintf("\tEasy-get: psi-rad = %f\n",euler.Entry(3));
     return euler.Entry(3);
@@ -415,7 +416,7 @@ double TestInterface::EasyGetValue(const string prop)
   {
     if ( verbosityLevel == eVeryVerbose )
       mexPrintf("\tEasy-set: rudder pos (deg) = %f\n",fdmExec->GetFCS()->GetDrPos());
-    return GetFCS()->GetDrPos();
+    return fdmExec->GetFCS()->GetDrPos();
   }
   return 0;
 }
@@ -506,7 +507,7 @@ bool TestInterface::Init()
 	_qdot = fdmExec->GetAccelerations()->GetPQRdot(2);
 	_rdot = fdmExec->GetAccelerations()->GetPQRdot(3);
 	*/
-	FGQuaternion Quatdot = propagate->GetQuaterniondot();
+	FGQuaternion Quatdot = accel->GetQuaterniondot();
 	_q1dot = Quatdot(1);
 	_q2dot = Quatdot(2);
 	_q3dot = Quatdot(3);

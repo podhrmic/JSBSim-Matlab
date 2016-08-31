@@ -1,6 +1,11 @@
 #include "JSBSimInterface.h"
 #include <models/FGAircraft.h>
+#include <models/FGAccelerations.h>
 #include <math/FGQuaternion.h>
+
+/*
+ * Compiles with JSBSim checkout a59596f8f0d4c7b4f7ba24e99997bc2071d6cb72
+ */
 
 JSBSimInterface::JSBSimInterface(FGFDMExec *fdmex)
 {
@@ -8,7 +13,7 @@ JSBSimInterface::JSBSimInterface(FGFDMExec *fdmex)
 	fdmExec = fdmex;
 	propagate = fdmExec->GetPropagate();
 	accel = fdmExec->GetAccelerations();
-	//accel->InitModel();
+	accel->InitModel();
 	auxiliary = fdmExec->GetAuxiliary();
 	aerodynamics = fdmExec->GetAerodynamics();
 	propulsion = fdmExec->GetPropulsion();
@@ -38,7 +43,7 @@ bool JSBSimInterface::Open(const mxArray *prhs)
 
 	if ( fdmExec->GetAircraft()->GetAircraftName() != ""  )
 	{
-		if ( verbosityLevel == eVerbose )
+		if ( verbosityLevel >= eVerbose )
 		{
 			mexPrintf("\tERROR: another aircraft is already loaded ('%s').\n", fdmExec->GetAircraft()->GetAircraftName().c_str());
 			mexPrintf("\t       To load a new aircraft, clear the mex file and start up again.\n");
@@ -48,14 +53,14 @@ bool JSBSimInterface::Open(const mxArray *prhs)
 
 	// JSBSim stuff
 
-	if ( verbosityLevel == eVerbose )
+	if ( verbosityLevel >= eVerbose )
 		mexPrintf("\tSetting up JSBSim with standard 'aircraft', 'engine', and 'system' paths.\n");
 
     fdmExec->SetAircraftPath (rootDir + "aircraft");
     fdmExec->SetEnginePath   (rootDir + "engine"  );
     fdmExec->SetSystemsPath  (rootDir + "systems" );
 
-	if ( verbosityLevel == eVerbose )
+	if ( verbosityLevel >= eVerbose )
 		mexPrintf("\tLoading aircraft '%s' ...\n",acName.c_str());
 
     if ( ! fdmExec->LoadModel( rootDir + "aircraft",
@@ -63,13 +68,13 @@ bool JSBSimInterface::Open(const mxArray *prhs)
                                rootDir + "systems",
                                acName)) 
 	{
-		if ( verbosityLevel == eVerbose )
+		if ( verbosityLevel >= eVerbose )
 			mexPrintf("\tERROR: JSBSim could not load the aircraft model.\n");
 		return 0;
     }
 	_ac_model_loaded = true;
 	// Print AC name
-	if ( verbosityLevel == eVerbose )
+	if ( verbosityLevel >= eVerbose )
 		mexPrintf("\tModel %s loaded.\n", fdmExec->GetModelName().c_str() );
 
 //***********************************************************************
@@ -97,13 +102,16 @@ bool JSBSimInterface::GetPropertyValue(const mxArray *prhs1, double& value)
 	mxGetString(prhs1, buf, buflen);
 	string prop = "";
 	prop = string(buf);
+	/*
 	if ( !QueryJSBSimProperty(prop) )
 	{
-		if ( verbosityLevel == eVerbose )
+		if ( verbosityLevel >= eVerbose )
 			mexPrintf("\tERROR: JSBSim could not find the property '%s' in the aircraft catalog.\n",prop.c_str());
 		return 0;
 	}
 	value = fdmExec->GetPropertyValue(prop);
+	*/
+	value = EasyGetValue(prop);
 	return 1;
 }
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -124,7 +132,7 @@ bool JSBSimInterface::SetPropertyValue(const mxArray *prhs1, const mxArray *prhs
 	{
 		if ( !QueryJSBSimProperty(prop) ) // then try to set the full-path property, e.g. '/fcs/elevator-cmd-norm'
 		{
-			if ( verbosityLevel == eVerbose )
+			if ( verbosityLevel >= eVerbose )
 				mexPrintf("\tERROR: JSBSim could not find the property '%s' in the aircraft catalog.\n",prop.c_str());
 			return 0;
 		}
@@ -327,6 +335,110 @@ bool JSBSimInterface::EasySetValue(const string prop, const double value)
 	return 0;
 }
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+double JSBSimInterface::EasyGetValue(const string prop)
+{
+  if (prop == "set-running")
+  {
+    if ( verbosityLevel == eVeryVerbose )
+      mexPrintf("\tEasy-Get: engine(s) running = %i\n",fdmExec->GetPropulsion()->GetEngine(0)->GetRunning());
+    return fdmExec->GetPropulsion()->GetEngine(0)->GetRunning();
+  }
+  else if (prop == "u-fps")
+  {
+    if ( verbosityLevel == eVeryVerbose )
+      mexPrintf("\tEasy-get: propagate->GetUVW(1);= %f\n", propagate->GetUVW(1));
+    return propagate->GetUVW(1);;
+  }
+  else if (prop == "v-fps")
+  {
+    if ( verbosityLevel == eVeryVerbose )
+      mexPrintf("\tEasy-get: propagate->GetUVW(2);= %f\n", propagate->GetUVW(2));
+    return propagate->GetUVW(2);;
+  }
+  else if (prop == "w-fps")
+  {
+    if ( verbosityLevel == eVeryVerbose )
+      mexPrintf("\tEasy-get: propagate->GetUVW(3);= %f\n", propagate->GetUVW(3));
+    return propagate->GetUVW(3);;
+  }
+  else if (prop == "p-rad_sec")
+  {
+    if ( verbosityLevel == eVeryVerbose )
+      mexPrintf("\tEasy-get: roll rate (rad/s) = %f\n",propagate->GetPQR(1));
+    return propagate->GetPQR(1);;
+  }
+  else if (prop == "q-rad_sec")
+  {
+    if ( verbosityLevel == eVeryVerbose )
+      mexPrintf("\tEasy-get: pitch rate (rad/s) = %f\n",propagate->GetPQR(2));
+    return propagate->GetPQR(2);
+  }
+  else if (prop == "r-rad_sec")
+  {
+    if ( verbosityLevel == eVeryVerbose )
+      mexPrintf("\tEasy-get: yaw rate (rad/s) = %f\n",propagate->GetPQR(3));
+    return propagate->GetPQR(3);
+  }
+  else if (prop == "h-sl-ft")
+  {
+    if ( verbosityLevel == eVeryVerbose )
+      mexPrintf("\tEasy-get: altitude over sea level (mt) = %f\n",propagate->GetAltitudeASLmeters());
+    return propagate->GetAltitudeASLmeters();
+  }
+  else if (prop == "long-gc-deg")
+  {
+    if ( verbosityLevel == eVeryVerbose )
+      mexPrintf("\tEasy-get: geocentric longitude (deg) = %f\n",propagate->GetLongitudeDeg());
+    return propagate->GetLongitudeDeg();
+  }
+  else if (prop == "lat-gc-deg")
+  {
+    if ( verbosityLevel == eVeryVerbose )
+      mexPrintf("\tEasy-get: geocentric latitude (deg) = %f\n",propagate->GetLatitudeDeg());
+    return propagate->GetLatitudeDeg();
+  }
+  else if (prop == "phi-rad")
+  {
+    FGColumnVector3 euler = propagate->GetVState().qAttitudeLocal.GetEuler();
+    if ( verbosityLevel == eVeryVerbose )
+      mexPrintf("\tEasy-get: phi-rad = %f\n",euler.Entry(1));
+    return euler.Entry(1);
+  }
+  else if (prop == "theta-rad")
+  {
+    FGColumnVector3 euler = propagate->GetVState().qAttitudeLocal.GetEuler();
+    if ( verbosityLevel == eVeryVerbose )
+      mexPrintf("\tEasy-get: theta-rad = %f\n",euler.Entry(2));
+    return euler.Entry(2);
+  }
+  else if (prop == "psi-rad")
+  {
+    FGColumnVector3 euler = propagate->GetVState().qAttitudeLocal.GetEuler();
+    if ( verbosityLevel == eVeryVerbose )
+      mexPrintf("\tEasy-get: psi-rad = %f\n",euler.Entry(3));
+    return euler.Entry(3);
+  }
+  else if (prop == "elevator-pos-rad")
+  {
+    if ( verbosityLevel == eVeryVerbose )
+      mexPrintf("\tEasy-get: elevator pos (rad) = %f\n",fdmExec->GetFCS()->GetDePos());
+    return fdmExec->GetFCS()->GetDePos();
+  }
+  else if (prop == "aileron-pos-rad")
+  {
+    if ( verbosityLevel == eVeryVerbose )
+      mexPrintf("\tEasy-get: right aileron pos (rad) = %f\n",fdmExec->GetFCS()->GetDaRPos());
+    return fdmExec->GetFCS()->GetDaRPos();
+  }
+  else if (prop == "rudder-pos-rad")
+  {
+    if ( verbosityLevel == eVeryVerbose )
+      mexPrintf("\tEasy-set: rudder pos (deg) = %f\n",fdmExec->GetFCS()->GetDrPos());
+    return fdmExec->GetFCS()->GetDrPos();
+  }
+  return 0;
+}
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 bool JSBSimInterface::QueryJSBSimProperty(string prop)
 {
 	// mexPrintf("catalog size: %d\n",catalog.size());
@@ -340,7 +452,7 @@ bool JSBSimInterface::QueryJSBSimProperty(string prop)
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 void JSBSimInterface::PrintCatalog()
 {
-	if ( verbosityLevel == eVerbose )
+	if ( verbosityLevel >= eVerbose )
 	{
 		const std::string& name = fdmExec->GetAircraft()->GetAircraftName();
 		mexPrintf("-- Property catalog for current aircraft ('%s'):\n", name.c_str());
@@ -541,7 +653,7 @@ bool JSBSimInterface::Init(const mxArray *prhs1)
 	_qdot = fdmExec->GetAccelerations()->GetPQRdot(2);
 	_rdot = fdmExec->GetAccelerations()->GetPQRdot(3);
 	*/
-	FGQuaternion Quatdot = propagate->GetQuaterniondot();
+	FGQuaternion Quatdot = accel->GetQuaterniondot();
 	_q1dot = Quatdot(1);
 	_q2dot = Quatdot(2);
 	_q3dot = Quatdot(3);
@@ -556,7 +668,7 @@ bool JSBSimInterface::Init(const mxArray *prhs1)
 	_alphadot = auxiliary->Getadot();
 	_betadot = auxiliary->Getbdot();
 
-	if ( verbosityLevel == eVerbose )
+	if ( verbosityLevel >= eVerbose )
 	{
 		mexPrintf("\tState derivatives calculated.\n");
 
@@ -575,7 +687,7 @@ bool JSBSimInterface::Init(const mxArray *prhs1)
 
 	if (!success)
 	{
-		if ( verbosityLevel == eVerbose )
+		if ( verbosityLevel >= eVerbose )
 			mexPrintf("\tERROR: One or more or all the required properties could not be initialized.\n");
 		return 0;
 	}
@@ -588,7 +700,7 @@ bool JSBSimInterface::Init(const mxArray *prhs1, vector<double>& statedot)
 	if (statedot.size() != 19) return 0;
 	if (!Init(prhs1))
 	{
-		if ( verbosityLevel == eVerbose )
+		if ( verbosityLevel >= eVerbose )
 			mexPrintf("\tERROR: could not calculate dotted states correctly.\n");
 		return 0;
 	}

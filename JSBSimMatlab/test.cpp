@@ -68,10 +68,20 @@ int main(int argc, char **argv)
 
 
 	double value = -1;
-	string prop = "atmosphere/turb-north-fps (RW)";
+	string prop = "fcs/rudder-cmd-norm (RW)";
 
-	FDMExec.SetPropertyValue(prop,value);
+	printf("Setting %s.\n",prop.c_str());
+	 //FDMExec.SetPropertyValue("fcs/rudder-cmd-norm",value);
+	if (!JI.SetPropertyValue(prop,value)){
+		printf("Check property name.\n");
+	}
+	else {
+		printf("Success.\n");
+	}
 
+
+	//JI.RunIC(); // loop JSBSim once w/o integrating
+	JI.RunFDMExec();
 
 	printf("Getting %s.\n",prop.c_str());
 	if ( !JI.GetPropertyValue(prop,value) )
