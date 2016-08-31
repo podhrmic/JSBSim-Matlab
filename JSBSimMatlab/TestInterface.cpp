@@ -91,13 +91,14 @@ bool TestInterface::Open(string name)
 	return 1;
 }
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-bool TestInterface::GetPropertyValue(string name, double& value)
+bool TestInterface::GetPropertyValue(const string prop, double& value)
 {
 	if (!fdmExec) return 0;
 	if (!IsAircraftLoaded()) return 0;
 
-	string prop = "";
-	prop = name;
+	value = EasyGetValue(prop);
+
+/*
 	if ( !QueryJSBSimProperty(prop) )
 	{
 		if ( verbosityLevel == eVerbose )
@@ -107,6 +108,7 @@ bool TestInterface::GetPropertyValue(string name, double& value)
 	mexPrintf("JSBSimInterface::GetPropertyValue: Asking for %s\n", prop.c_str());
 	cout << "JSBSimInterface::GetPropertyValue: Asking for " << prop << endl;
 	value = fdmExec->GetPropertyValue(prop);
+	*/
 	return 1;
 }
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -312,6 +314,110 @@ bool TestInterface::EasySetValue(const string prop, const double value)
 		return 1;
 	}
 	return 0;
+}
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+double TestInterface::EasyGetValue(const string prop)
+{
+  if (prop == "set-running")
+  {
+    if ( verbosityLevel == eVeryVerbose )
+      mexPrintf("\tEasy-Get: engine(s) running = %i\n",fdmExec->GetPropulsion()->GetEngine(0)->GetRunning());
+    return fdmExec->GetPropulsion()->GetEngine(0)->GetRunning();
+  }
+  else if (prop == "u-fps")
+  {
+    if ( verbosityLevel == eVeryVerbose )
+      mexPrintf("\tEasy-get: propagate->GetUVW(1);= %f\n", propagate->GetUVW(1));
+    return propagate->GetUVW(1);;
+  }
+  else if (prop == "v-fps")
+  {
+    if ( verbosityLevel == eVeryVerbose )
+      mexPrintf("\tEasy-get: propagate->GetUVW(2);= %f\n", propagate->GetUVW(2));
+    return propagate->GetUVW(2);;
+  }
+  else if (prop == "w-fps")
+  {
+    if ( verbosityLevel == eVeryVerbose )
+      mexPrintf("\tEasy-get: propagate->GetUVW(3);= %f\n", propagate->GetUVW(3));
+    return propagate->GetUVW(3);;
+  }
+  else if (prop == "p-rad_sec")
+  {
+    if ( verbosityLevel == eVeryVerbose )
+      mexPrintf("\tEasy-get: roll rate (rad/s) = %f\n",propagate->GetPQR(1));
+    return propagate->GetPQR(1);;
+  }
+  else if (prop == "q-rad_sec")
+  {
+    if ( verbosityLevel == eVeryVerbose )
+      mexPrintf("\tEasy-get: pitch rate (rad/s) = %f\n",propagate->GetPQR(2));
+    return propagate->GetPQR(2);
+  }
+  else if (prop == "r-rad_sec")
+  {
+    if ( verbosityLevel == eVeryVerbose )
+      mexPrintf("\tEasy-get: yaw rate (rad/s) = %f\n",propagate->GetPQR(3));
+    return propagate->GetPQR(3);
+  }
+  else if (prop == "h-sl-ft")
+  {
+    if ( verbosityLevel == eVeryVerbose )
+      mexPrintf("\tEasy-get: altitude over sea level (mt) = %f\n",propagate->GetAltitudeASLmeters());
+    return propagate->GetAltitudeASLmeters();
+  }
+  else if (prop == "long-gc-deg")
+  {
+    if ( verbosityLevel == eVeryVerbose )
+      mexPrintf("\tEasy-get: geocentric longitude (deg) = %f\n",propagate->GetLongitudeDeg());
+    return propagate->GetLongitudeDeg();
+  }
+  else if (prop == "lat-gc-deg")
+  {
+    if ( verbosityLevel == eVeryVerbose )
+      mexPrintf("\tEasy-get: geocentric latitude (deg) = %f\n",propagate->GetLatitudeDeg());
+    return propagate->GetLatitudeDeg();
+  }
+  else if (prop == "phi-rad")
+  {
+    FGColumnVector3 euler = propagate->GetVState().GetEuler();
+    if ( verbosityLevel == eVeryVerbose )
+      mexPrintf("\tEasy-get: phi-rad = %f\n",euler.Entry(1));
+    return euler.Entry(1);
+  }
+  else if (prop == "theta-rad")
+  {
+    FGColumnVector3 euler = propagate->GetVState().GetEuler();
+    if ( verbosityLevel == eVeryVerbose )
+      mexPrintf("\tEasy-get: theta-rad = %f\n",euler.Entry(2));
+    return euler.Entry(2);
+  }
+  else if (prop == "psi-rad")
+  {
+    FGColumnVector3 euler = propagate->GetVState().GetEuler();
+    if ( verbosityLevel == eVeryVerbose )
+      mexPrintf("\tEasy-get: psi-rad = %f\n",euler.Entry(3));
+    return euler.Entry(3);
+  }
+  else if (prop == "elevator-pos-rad")
+  {
+    if ( verbosityLevel == eVeryVerbose )
+      mexPrintf("\tEasy-get: elevator pos (rad) = %f\n",fdmExec->GetFCS()->GetDePos());
+    return fdmExec->GetFCS()->GetDePos();
+  }
+  else if (prop == "aileron-pos-rad")
+  {
+    if ( verbosityLevel == eVeryVerbose )
+      mexPrintf("\tEasy-get: right aileron pos (rad) = %f\n",fdmExec->GetFCS()->GetDaRPos());
+    return fdmExec->GetFCS()->GetDaRPos();
+  }
+  else if (prop == "rudder-pos-rad")
+  {
+    if ( verbosityLevel == eVeryVerbose )
+      mexPrintf("\tEasy-set: rudder pos (deg) = %f\n",fdmExec->GetFCS()->GetDrPos());
+    return GetFCS()->GetDrPos();
+  }
+  return 0;
 }
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 bool TestInterface::QueryJSBSimProperty(string prop)

@@ -34,6 +34,8 @@ public:
 	bool SetPropertyValue(const string prop, const double value);
 	/// Enables a number of commonly used settings
 	bool EasySetValue(const string prop, const double value);
+	// Get a commonly used value
+	double EasyGetValue(const string prop);
 	/// Check if the given string is present in the catalog
 	bool QueryJSBSimProperty(string prop);
 	/// Print the aircraft catalog
