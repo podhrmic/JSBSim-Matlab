@@ -22,13 +22,13 @@ public:
 	/// Set a property in the catalog
 	bool SetPropertyValue(const mxArray *prhs1, const mxArray *prhs2);
 	/// Set a property in the catalog
-	bool SetPropertyValue(const string prop, const double value);
+	bool SetPropertyValue(const string& prop, const double value);
 	/// Enables a number of commonly used settings
-	bool EasySetValue(const string prop, const double value);
+	bool EasySetValue(const string& prop, const double value);
 	// Get a commonly used value
-	double EasyGetValue(const string prop);
+	double EasyGetValue(const string& prop, double& value);
 	/// Check if the given string is present in the catalog
-	bool QueryJSBSimProperty(string prop);
+	bool QueryJSBSimProperty(const string& prop);
 	/// Print the aircraft catalog
 	void PrintCatalog();
 

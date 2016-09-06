@@ -39,19 +39,6 @@ int main(int argc, char **argv)
 		printf("JSBSim started.\n");
 	}
 
-
-
-	JI.PrintCatalog();
-
-	if (JI.SetVerbosity(2)){
-		printf("Verbosity set!\n");
-	}
-	else {
-		printf("Verbosity NOT set!\n");
-	}
-
-
-
 	if (JI.Init())
 	{
 		printf("Init done!\n");
@@ -61,17 +48,31 @@ int main(int argc, char **argv)
 		printf("Init failed!\n");
 	}
 
+	//JI.PrintCatalog();
 
 	FDMExec.SetRootDir("/home/fwmav/Paparazzi/Code/JSBSim-Matlab");
 	cout << "Root dir: " << FDMExec.GetRootDir() << endl;
 
-
+	if (JI.SetVerbosity(2)){
+		printf("Verbosity set!\n");
+	}
+	else {
+		printf("Verbosity NOT set!\n");
+	}
 
 	double value = -1;
-	string prop = "fcs/rudder-cmd-norm (RW)";
-
+	string prop = "fcs/rudder-cmd-norm";
 	printf("Setting %s.\n",prop.c_str());
-	 //FDMExec.SetPropertyValue("fcs/rudder-cmd-norm",value);
+
+	/*
+	FDMExec.SetPropertyValue(prop,value);
+	printf("Setting done.\n");
+
+	printf("Getting %s\n", prop.c_str());
+	double value2 = FDMExec.GetPropertyValue(prop);
+	printf("Done. Set %s = %f, got %s = %f \n", prop.c_str(), value, prop.c_str(), value2);
+	*/
+
 	if (!JI.SetPropertyValue(prop,value)){
 		printf("Check property name.\n");
 	}
@@ -79,8 +80,6 @@ int main(int argc, char **argv)
 		printf("Success.\n");
 	}
 
-
-	//JI.RunIC(); // loop JSBSim once w/o integrating
 	JI.RunFDMExec();
 
 	printf("Getting %s.\n",prop.c_str());
