@@ -53,9 +53,13 @@ ret = MexJSBSim('init',ic)
 
 %%
 MexJSBSim('catalog')
-%%
-MexJSBSim('set','aileron-cmd-norm',1)
+%% Easy set
+MexJSBSim('set','aileron-cmd-norm',-1)
 %%
 MexJSBSim('get','aileron-pos-rad')
+%% fcs
+MexJSBSim('set','fcs/aileron-cmd-norm',-1)
+%%
+MexJSBSim('get','fcs/aileron-cmd-norm')
 %%
 clear MexJSBSim

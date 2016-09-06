@@ -92,28 +92,25 @@ bool TestInterface::Open(string name)
 	return 1;
 }
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-bool TestInterface::GetPropertyValue(const string prop, double& value)
+bool TestInterface::GetPropertyValue(const string& prop, double& value)
 {
 	if (!fdmExec) return 0;
 	if (!IsAircraftLoaded()) return 0;
 
-	value = EasyGetValue(prop);
-
-/*
-	if ( !QueryJSBSimProperty(prop) )
+	if (!EasyGetValue(prop)) // first check if an easy way of setting is implemented
 	{
-		if ( verbosityLevel == eVerbose )
-			mexPrintf("\tERROR: JSBSim could not find the property '%s' in the aircraft catalog.\n",prop.c_str());
-		return 0;
+		if ( !QueryJSBSimProperty(prop) )
+		{
+			if ( verbosityLevel >= eVerbose )
+				mexPrintf("\tERROR: JSBSim could not find the property '%s' in the aircraft catalog.\n",prop.c_str());
+			return 0;
+		}
+		value = fdmExec->GetPropertyValue(prop);;
 	}
-	mexPrintf("JSBSimInterface::GetPropertyValue: Asking for %s\n", prop.c_str());
-	cout << "JSBSimInterface::GetPropertyValue: Asking for " << prop << endl;
-	value = fdmExec->GetPropertyValue(prop);
-	*/
 	return 1;
 }
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-bool TestInterface::SetPropertyValue(const string prop, const double value)
+bool TestInterface::SetPropertyValue(const std::string& prop, const double value)
 {
 	if (!fdmExec) return 0;
 	if (!IsAircraftLoaded()) return 0;
@@ -122,7 +119,7 @@ bool TestInterface::SetPropertyValue(const string prop, const double value)
 	{
 		if ( !QueryJSBSimProperty(prop) ) // then try to set the full-path property, e.g. '/fcs/elevator-cmd-norm'
 		{
-			if ( verbosityLevel == eVerbose )
+			if ( verbosityLevel >= eVerbose )
 				mexPrintf("\tERROR: JSBSim could not find the property '%s' in the aircraft catalog.\n",prop.c_str());
 			return 0;
 		}
@@ -131,7 +128,7 @@ bool TestInterface::SetPropertyValue(const string prop, const double value)
 	return 1;
 }
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-bool TestInterface::EasySetValue(const string prop, const double value)
+bool TestInterface::EasySetValue(const string& prop, const double value)
 {
 	if (prop == "set-running")
 	{
@@ -421,7 +418,7 @@ double TestInterface::EasyGetValue(const string prop)
   return 0;
 }
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-bool TestInterface::QueryJSBSimProperty(string prop)
+bool TestInterface::QueryJSBSimProperty(const string& prop)
 {
 	// mexPrintf("catalog size: %d\n",catalog.size());
 	for (unsigned i=0; i<catalog.size(); i++)
@@ -430,8 +427,7 @@ bool TestInterface::QueryJSBSimProperty(string prop)
 		//if (catalog[i].find(prop) != std::string::npos) {
 		//    std::cout << prop  << "found! Catalog entry is"  << catalog[i] << '\n';
 		//}
-		if (catalog[i]==prop) return 1;
-		//if (catalog[i].find(prop) != std::string::npos) return 1;
+		if (catalog[i].find(prop) != std::string::npos) return 1;
 	}
 	return 0;
 }
