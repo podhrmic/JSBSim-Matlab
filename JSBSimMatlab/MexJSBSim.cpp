@@ -117,27 +117,43 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		{
 			option = string(buf);
 
-			if ( option == "help")
+			if (option == "run")
 			{
-				helpOptions();
-				plhs[0] = mxCreateDoubleMatrix(1, 1, mxREAL);
-				*mxGetPr(plhs[0]) = 1;
+			  if (JI.RunFDMExec())
+			  {
+			    plhs[0] = mxCreateDoubleMatrix(1, 1, mxREAL);
+			    *mxGetPr(plhs[0]) = 1;
+			  }
+			  else
+			  {
+          plhs[0] = mxCreateDoubleMatrix(1, 1, mxREAL);
+          *mxGetPr(plhs[0]) = 0;
+			  }
 			}
 			else
 			{
-				if ( option == "catalog")
-				{
-					JI.PrintCatalog();
-					plhs[0] = mxCreateDoubleMatrix(1, 1, mxREAL);
-					*mxGetPr(plhs[0]) = 1;
-				}
-				else
-				{
-					mexPrintf("Uncorrect call to this function.\n\n");
-					helpOptions();
-					plhs[0] = mxCreateDoubleMatrix(1, 1, mxREAL);
-					*mxGetPr(plhs[0]) = 0;
-				}
+        if ( option == "help")
+        {
+          helpOptions();
+          plhs[0] = mxCreateDoubleMatrix(1, 1, mxREAL);
+          *mxGetPr(plhs[0]) = 1;
+        }
+        else
+        {
+          if ( option == "catalog")
+          {
+            JI.PrintCatalog();
+            plhs[0] = mxCreateDoubleMatrix(1, 1, mxREAL);
+            *mxGetPr(plhs[0]) = 1;
+          }
+          else
+          {
+            mexPrintf("Incorrect call to this function.\n\n");
+            helpOptions();
+            plhs[0] = mxCreateDoubleMatrix(1, 1, mxREAL);
+            *mxGetPr(plhs[0]) = 0;
+          }
+        }
 			}
 		}
 		if (nrhs>1)
