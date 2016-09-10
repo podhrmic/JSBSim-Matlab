@@ -2,9 +2,9 @@ clear all; close all
 clc
 
 MexJSBSim('SetVerbosity',2)
-MexJSBSim('open','c172r')
+MexJSBSim('open','c172x')
 
-% initial conditions and inputs
+%% initial conditions and inputs
 ic( 1).name  = 'u-fps';
 ic( 1).value = 0;
 ic( 2).name  = 'v-fps';
@@ -51,4 +51,15 @@ ic(16).value = 1;
     
 ret = MexJSBSim('init',ic)
 
-%clear MexJSBSim
+%%
+MexJSBSim('catalog')
+%% Easy set
+MexJSBSim('set','aileron-cmd-norm',-1)
+%%
+MexJSBSim('get','aileron-pos-rad')
+%% fcs
+MexJSBSim('set','fcs/aileron-cmd-norm',-1)
+%%
+MexJSBSim('get','fcs/aileron-cmd-norm')
+%%
+clear MexJSBSim

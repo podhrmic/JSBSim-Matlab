@@ -1,7 +1,14 @@
-#ifndef JSBSIMINTERFACE_HEADER_H
-#define JSBSIMINTERFACE_HEADER_H
+/*
+ * TestInterface.h
+ *
+ *  Created on: Aug 29, 2016
+ *      Author: fwmav
+ */
 
-#include "mex.h"
+#ifndef JSBSIMMATLAB_TESTINTERFACE_H_
+#define JSBSIMMATLAB_TESTINTERFACE_H_
+
+
 #include <FGFDMExec.h>
 #include <initialization/FGInitialCondition.h>
 #include <models/FGAuxiliary.h>
@@ -10,25 +17,25 @@
 
 using namespace JSBSim;
 
-class JSBSimInterface
+class TestInterface
 {
 public:
-	JSBSimInterface(FGFDMExec *);
-	JSBSimInterface(FGFDMExec *, double dt);
-	~JSBSimInterface(void);
+	TestInterface(FGFDMExec *);
+	~TestInterface(void);
 	/// Open an aircraft model from Matlab
-	bool Open(const mxArray *prhs0);
-	bool Open(const string& acName);
+	//bool Open(const mxArray *prhs0);
+	bool Open(string name);
 	/// Get a property from the catalog
-	bool GetPropertyValue(const mxArray *prhs1, double& value);
+	//bool GetPropertyValue(const mxArray *prhs1, double& value);
+	bool GetPropertyValue(const string& name, double& value);
 	/// Set a property in the catalog
-	bool SetPropertyValue(const mxArray *prhs1, const mxArray *prhs2);
+	//bool SetPropertyValue(const mxArray *prhs1, const mxArray *prhs2);
 	/// Set a property in the catalog
 	bool SetPropertyValue(const string& prop, const double value);
 	/// Enables a number of commonly used settings
 	bool EasySetValue(const string& prop, const double value);
 	// Get a commonly used value
-	double EasyGetValue(const string& prop, double& value);
+	double EasyGetValue(const string prop);
 	/// Check if the given string is present in the catalog
 	bool QueryJSBSimProperty(const string& prop);
 	/// Print the aircraft catalog
@@ -37,8 +44,8 @@ public:
 	bool IsAircraftLoaded(){return _ac_model_loaded;}
 	/// Set an initial state
 	/*
-        *prhs1 is a Matlab structure of names/values couples, 
-        e.g. 
+        *prhs1 is a Matlab structure of names/values couples,
+        e.g.
         ic( 1).name  = 'u-fps';
         ic( 1).value = 80;
         ic( 2).name  = 'v-fps';
@@ -46,23 +53,13 @@ public:
         ic( 3).name  = 'w-fps';
         ic( 3).value = 10;
 	*/
-	bool Init(const mxArray *prhs1);
+	bool Init();
 
 	/// put the 16 dotted quantities into statedot:
 	/*
 	dot of (u,v,w,p,q,r,q1,q2,q3,q4,x,y,z,phi,theta,psi)
 	*/
-	bool Init(const mxArray *prhs1, vector<double>& statedot);
-
-  /// Set an initial state
-  /*
-    *prhs1 is a Matlab structure of strings/values couples,
-      e.g. ['u','v','w', 'p','q','r', 'phi','tht','psi', 'lat','lon','h' ]
-      [ 80,0,0, 0,0,0, 0,2,0, 36,44,1000 ]
-      where
-      (*rhs1)(4).name = 'p'; (*rhs1)(1).value = 80;
-  */
-  bool ResetToInitialCondition(void);
+	//bool Init(const mxArray *prhs1, vector<double>& statedot);
 
 	// Wrapper functions to the FGFDMExec class
 	bool RunFDMExec() {return fdmExec->Run();}
@@ -86,7 +83,7 @@ public:
 	enum JIVerbosityLevel {eSilent=0, eVerbose, eVeryVerbose} verbosityLevel;
 
 	/// Set verbosity level
-	bool SetVerbosity(const mxArray *prhs1);
+	bool SetVerbosity(int ival);
 	void SetVerbosity(const JIVerbosityLevel vl) {verbosityLevel = vl;}
 
 private:
@@ -117,5 +114,6 @@ private:
 	double _alphadot,_betadot,_hdot;
 
 };
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-#endif
+
+
+#endif /* JSBSIMMATLAB_TESTINTERFACE_H_ */
