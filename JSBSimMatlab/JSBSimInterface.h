@@ -14,9 +14,11 @@ class JSBSimInterface
 {
 public:
 	JSBSimInterface(FGFDMExec *);
+	JSBSimInterface(FGFDMExec *, double dt);
 	~JSBSimInterface(void);
 	/// Open an aircraft model from Matlab
 	bool Open(const mxArray *prhs0);
+	bool Open(const string& acName);
 	/// Get a property from the catalog
 	bool GetPropertyValue(const mxArray *prhs1, double& value);
 	/// Set a property in the catalog
@@ -51,6 +53,16 @@ public:
 	dot of (u,v,w,p,q,r,q1,q2,q3,q4,x,y,z,phi,theta,psi)
 	*/
 	bool Init(const mxArray *prhs1, vector<double>& statedot);
+
+  /// Set an initial state
+  /*
+    *prhs1 is a Matlab structure of strings/values couples,
+      e.g. ['u','v','w', 'p','q','r', 'phi','tht','psi', 'lat','lon','h' ]
+      [ 80,0,0, 0,0,0, 0,2,0, 36,44,1000 ]
+      where
+      (*rhs1)(4).name = 'p'; (*rhs1)(1).value = 80;
+  */
+  bool ResetToInitialCondition(void);
 
 	// Wrapper functions to the FGFDMExec class
 	bool RunFDMExec() {return fdmExec->Run();}

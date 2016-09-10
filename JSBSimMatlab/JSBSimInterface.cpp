@@ -21,11 +21,80 @@ JSBSimInterface::JSBSimInterface(FGFDMExec *fdmex)
 	ic = new FGInitialCondition(fdmExec);
 	verbosityLevel = JSBSimInterface::eSilent;
 }
+JSBSimInterface::JSBSimInterface(FGFDMExec *fdmex, double dt)
+{
+  _ac_model_loaded = false;
+  fdmExec = fdmex;
+  fdmExec->Setdt(dt);
+  mexPrintf("Simulation dt set to %f\n",fdmExec->GetDeltaT());
+  propagate = fdmExec->GetPropagate();
+  accel = fdmExec->GetAccelerations();
+  accel->InitModel();
+  auxiliary = fdmExec->GetAuxiliary();
+  aerodynamics = fdmExec->GetAerodynamics();
+  propulsion = fdmExec->GetPropulsion();
+  fcs = fdmExec->GetFCS();
+  ic = new FGInitialCondition(fdmExec);
+  verbosityLevel = JSBSimInterface::eSilent;
+}
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 JSBSimInterface::~JSBSimInterface(void)
 {
 	fdmExec = 0L;
 	delete ic;
+}
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+bool JSBSimInterface::Open(const string& acName)
+{
+  string rootDir = "JSBSim/";
+  if ( fdmExec->GetAircraft()->GetAircraftName() != ""  )
+  {
+    if ( verbosityLevel >= eVerbose )
+    {
+      mexPrintf("\tERROR: another aircraft is already loaded ('%s').\n", fdmExec->GetAircraft()->GetAircraftName().c_str());
+      mexPrintf("\t       To load a new aircraft, clear the mex file and start up again.\n");
+    }
+    return 0;
+  }
+
+  // JSBSim stuff
+
+  if ( verbosityLevel >= eVerbose )
+    mexPrintf("\tSetting up JSBSim with standard 'aircraft', 'engine', and 'system' paths.\n");
+
+    fdmExec->SetAircraftPath (rootDir + "aircraft");
+    fdmExec->SetEnginePath   (rootDir + "engine"  );
+    fdmExec->SetSystemsPath  (rootDir + "systems" );
+
+  if ( verbosityLevel >= eVerbose )
+    mexPrintf("\tLoading aircraft '%s' ...\n",acName.c_str());
+
+    if ( ! fdmExec->LoadModel( rootDir + "aircraft",
+                               rootDir + "engine",
+                               rootDir + "systems",
+                               acName)) 
+  {
+    if ( verbosityLevel >= eVerbose )
+      mexPrintf("\tERROR: JSBSim could not load the aircraft model.\n");
+    return 0;
+    }
+  _ac_model_loaded = true;
+  // Print AC name
+  if ( verbosityLevel >= eVerbose )
+    mexPrintf("\tModel %s loaded.\n", fdmExec->GetModelName().c_str() );
+
+//***********************************************************************
+  // populate aircraft catalog
+  catalog = fdmExec->GetPropertyCatalog();
+
+  if ( verbosityLevel == eVeryVerbose )
+  {
+    for (unsigned i=0; i<catalog.size(); i++)
+      mexPrintf("%s\n",catalog[i].c_str());
+  }
+//***********************************************************************/
+
+  return 1;
 }
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 bool JSBSimInterface::Open(const mxArray *prhs)
@@ -37,58 +106,21 @@ bool JSBSimInterface::Open(const mxArray *prhs)
 	buflen = mxGetNumberOfElements(prhs) + 1;
 	mxGetString(prhs, buf, buflen);
 	string acName = string(buf);
-    string rootDir = "JSBSim/";
+
 
 	//mexEvalString("plot(sin(0:.1:pi))");
+  Open(acName);
 
-	if ( fdmExec->GetAircraft()->GetAircraftName() != ""  )
-	{
-		if ( verbosityLevel >= eVerbose )
-		{
-			mexPrintf("\tERROR: another aircraft is already loaded ('%s').\n", fdmExec->GetAircraft()->GetAircraftName().c_str());
-			mexPrintf("\t       To load a new aircraft, clear the mex file and start up again.\n");
-		}
-		return 0;
-	}
-
-	// JSBSim stuff
-
-	if ( verbosityLevel >= eVerbose )
-		mexPrintf("\tSetting up JSBSim with standard 'aircraft', 'engine', and 'system' paths.\n");
-
-    fdmExec->SetAircraftPath (rootDir + "aircraft");
-    fdmExec->SetEnginePath   (rootDir + "engine"  );
-    fdmExec->SetSystemsPath  (rootDir + "systems" );
-
-	if ( verbosityLevel >= eVerbose )
-		mexPrintf("\tLoading aircraft '%s' ...\n",acName.c_str());
-
-    if ( ! fdmExec->LoadModel( rootDir + "aircraft",
-                               rootDir + "engine",
-                               rootDir + "systems",
-                               acName)) 
-	{
-		if ( verbosityLevel >= eVerbose )
-			mexPrintf("\tERROR: JSBSim could not load the aircraft model.\n");
-		return 0;
-    }
-	_ac_model_loaded = true;
-	// Print AC name
-	if ( verbosityLevel >= eVerbose )
-		mexPrintf("\tModel %s loaded.\n", fdmExec->GetModelName().c_str() );
-
-//***********************************************************************
-	// populate aircraft catalog
-	catalog = fdmExec->GetPropertyCatalog();
-
-	if ( verbosityLevel == eVeryVerbose )
-	{
-		for (unsigned i=0; i<catalog.size(); i++) 
-			mexPrintf("%s\n",catalog[i].c_str());
-	}
-//***********************************************************************/
-
-	return 1;
+}
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+bool JSBSimInterface::ResetToInitialCondition()
+{
+  //mexEvalString("clearSF");
+  fdmExec->Setsim_time(0.0);
+  fdmExec->ResetToInitialConditions(0);
+  fdmExec->GetIC()->ResetIC(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+  mexPrintf("Aircraft states are reset to IC\n");
+  return 1;
 }
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 bool JSBSimInterface::GetPropertyValue(const mxArray *prhs1, double& value)
