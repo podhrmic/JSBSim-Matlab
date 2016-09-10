@@ -14,7 +14,7 @@ Compiled and tested on for Linux (Ubuntu).
 
 ## Installation (JSBSim for Simulink)
 1. Do steps 1-5 as in the previous case
-2. In Matlab command line type: `mex -v ./JSBSimMatlab/JSBSim_SFunction.cpp  ./JSBSimMatlab/JSBSimInterface.cpp -I./JSBSim/src -L./JSBSim/src/.libs -lJSBSim`
+2. In Matlab command line type: `mex -v ./JSBSimMatlab/JSBSim_SFunction.cpp  ./JSBSimMatlab/JSBSimInterface.cpp -I./JSBSim/src -L./JSBSim/src/.libs -lJSBSim` It will compile and output (on 64buit machines) *JSBSim_SFunction.mexa64*
 3. Now start `JSBSim_GUI.m` - it will open a GUI that you need to use
 4. In the GUI first click on **Load Model** (it will load the Simulink model with JSBSim S-function block). **You have to do this even if your Simulink model is already loaded**
 5. In the GUI type into the aircraft model name `c172x`
